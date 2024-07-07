@@ -50,4 +50,19 @@ else:
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Generate a response using the OpenAI AP
+        # Generate a response using the OpenAI API.
+        response = openai.Chat.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ]
+        )
+
+        # Get the assistant's response and display it.
+        assistant_message = response.choices[0].message["content"]
+        with st.chat_message("assistant"):
+            st.markdown(assistant_message)
+
+        # Store the assistant's response in session state.
+        st.session_state.messages.append({"role": "assistant", "content": assistant_message})
