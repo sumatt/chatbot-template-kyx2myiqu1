@@ -20,7 +20,7 @@ else:
     # messages persist across reruns.
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "system", "content": "You are a helpful assistant knowledgeable about cannabis."}
+            {"role": "system", "content": "I am pearl.ai, a helpful assistant knowledgeable about the cannabis plant."}
         ]
 
     # Display the existing chat messages via `st.chat_message`.
