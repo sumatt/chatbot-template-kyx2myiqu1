@@ -1,14 +1,23 @@
+import os
 import streamlit as st
 import openai
+import fitz  # PyMuPDF
+
+# Function to extract text from PDF
+def extract_text_from_pdf(file):
+    document = fitz.open(stream=file.read(), filetype="pdf")
+    text = ""
+    for page_num in range(document.page_count):
+        page = document.load_page(page_num)
+        text += page.get_text()
+    return text
 
 # Show title and description.
 st.title("Pearl AI")
 st.write("Ask about cannabis")
 
-# Ask user for their OpenAI API key via `st.text_input`.
-# Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
-# via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
-openai_api_key = st.secrets["OPENAI_API_KEY"]
+# Get OpenAI API key from secrets
+openai_api_key = st.secrets.get("OPENAI_API_KEY")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
 else:
@@ -22,7 +31,13 @@ else:
             {"role": "system", "content": "You are a helpful assistant knowledgeable about cannabis."}
         ]
 
-    # Display the existing chat messages via `st.chat_message`.
+    # Allow users to upload a PDF document
+    uploaded_file = st.file_uploader("Upload a PDF document", type="pdf")
+    if uploaded_file is not None:
+        pdf_text = extract_text_from_pdf(uploaded_file)
+        st.session_state.messages.append({"role": "system", "content": f"Here is some information from the uploaded PDF:\n\n{pdf_text}"})
+
+    # Display the existing chat messages
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
@@ -35,19 +50,4 @@ else:
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Generate a response using the OpenAI API.
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ]
-        )
-
-        # Get the assistant's response and display it.
-        assistant_message = response['choices'][0]['message']['content']
-        with st.chat_message("assistant"):
-            st.markdown(assistant_message)
-
-        # Store the assistant's response in session state.
-        st.session_state.messages.append({"role": "assistant", "content": assistant_message})
+        # Generate a response using the OpenAI AP
