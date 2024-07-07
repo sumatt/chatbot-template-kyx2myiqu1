@@ -1,5 +1,6 @@
+import os
 import streamlit as st
-import openai
+from openai import OpenAI
 
 # Show title and description.
 st.title("Pearl AI")
@@ -13,7 +14,7 @@ if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
 else:
     # Create an OpenAI client.
-    openai.api_key = openai_api_key
+    client = OpenAI(api_key=openai_api_key)
 
     # Create a session state variable to store the chat messages. This ensures that the
     # messages persist across reruns.
@@ -36,7 +37,7 @@ else:
             st.markdown(prompt)
 
         # Generate a response using the OpenAI API.
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": m["role"], "content": m["content"]}
@@ -45,7 +46,7 @@ else:
         )
 
         # Get the assistant's response and display it.
-        assistant_message = response['choices'][0]['message']['content']
+        assistant_message = response.choices[0].message.content
         with st.chat_message("assistant"):
             st.markdown(assistant_message)
 
